@@ -31,7 +31,7 @@ const CreatePage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: ""
+      title: "",
     },
   });
 
@@ -41,20 +41,19 @@ const CreatePage = () => {
     try {
       const response = await axios.post("/api/courses", values);
       router.push(`/teacher/courses/${response.data.id}`);
-      toast.success("Course created");
+      toast.success("Formation créé");
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     }
-  }
+  };
 
-  return ( 
+  return (
     <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full p-6">
       <div>
-        <h1 className="text-2xl">
-          Name your course
-        </h1>
+        <h1 className="text-2xl">Nommez votre formation</h1>
         <p className="text-sm text-slate-600">
-          What would you like to name your course? Don&apos;t worry, you can change this later.
+          Quel nom souhaiteriez-vous donner à votre formation ? Ne vous
+          inquiétez pas, vous pourrez modifier cela plus tard.
         </p>
         <Form {...form}>
           <form
@@ -66,18 +65,16 @@ const CreatePage = () => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Course title
-                  </FormLabel>
+                  <FormLabel>Titre de la formation</FormLabel>
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'Advanced web development'"
+                      placeholder="e.g. 'Développement web avancé'"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    What will you teach in this course?
+                    Qu`allez-vous enseigner dans cette formation ?
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -85,25 +82,19 @@ const CreatePage = () => {
             />
             <div className="flex items-center gap-x-2">
               <Link href="/">
-                <Button
-                  type="button"
-                  variant="ghost"
-                >
-                  Cancel
+                <Button type="button" variant="ghost">
+                  Annuler
                 </Button>
               </Link>
-              <Button
-                type="submit"
-                disabled={!isValid || isSubmitting}
-              >
-                Continue
+              <Button type="submit" disabled={!isValid || isSubmitting}>
+                Continuer
               </Button>
             </div>
           </form>
         </Form>
       </div>
     </div>
-   );
-}
- 
+  );
+};
+
 export default CreatePage;

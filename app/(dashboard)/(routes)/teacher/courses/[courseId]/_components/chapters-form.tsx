@@ -26,22 +26,19 @@ import { ChaptersList } from "./chapters-list";
 interface ChaptersFormProps {
   initialData: Course & { chapters: Chapter[] };
   courseId: string;
-};
+}
 
 const formSchema = z.object({
   title: z.string().min(1),
 });
 
-export const ChaptersForm = ({
-  initialData,
-  courseId
-}: ChaptersFormProps) => {
+export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const toggleCreating = () => {
     setIsCreating((current) => !current);
-  }
+  };
 
   const router = useRouter();
 
@@ -57,33 +54,33 @@ export const ChaptersForm = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/chapters`, values);
-      toast.success("Chapter created");
+      toast.success("Chapitre créé");
       toggleCreating();
       router.refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     }
-  }
+  };
 
   const onReorder = async (updateData: { id: string; position: number }[]) => {
     try {
       setIsUpdating(true);
 
       await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
-        list: updateData
+        list: updateData,
       });
-      toast.success("Chapters reordered");
+      toast.success("Chapitres réorganisés");
       router.refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     } finally {
       setIsUpdating(false);
     }
-  }
+  };
 
   const onEdit = (id: string) => {
     router.push(`/teacher/courses/${courseId}/chapters/${id}`);
-  }
+  };
 
   return (
     <div className="relative mt-6 border bg-slate-100 rounded-md p-4">
@@ -93,14 +90,14 @@ export const ChaptersForm = ({
         </div>
       )}
       <div className="font-medium flex items-center justify-between">
-        Course chapters
+        Chapitres de la formation
         <Button onClick={toggleCreating} variant="ghost">
           {isCreating ? (
-            <>Cancel</>
+            <>Annuler</>
           ) : (
             <>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Add a chapter
+              Ajouter un chapitre
             </>
           )}
         </Button>
@@ -119,7 +116,7 @@ export const ChaptersForm = ({
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'Introduction to the course'"
+                      placeholder="par exemple. 'Introduction a la formation'"
                       {...field}
                     />
                   </FormControl>
@@ -127,21 +124,20 @@ export const ChaptersForm = ({
                 </FormItem>
               )}
             />
-            <Button
-              disabled={!isValid || isSubmitting}
-              type="submit"
-            >
-              Create
+            <Button disabled={!isValid || isSubmitting} type="submit">
+              Créer
             </Button>
           </form>
         </Form>
       )}
       {!isCreating && (
-        <div className={cn(
-          "text-sm mt-2",
-          !initialData.chapters.length && "text-slate-500 italic"
-        )}>
-          {!initialData.chapters.length && "No chapters"}
+        <div
+          className={cn(
+            "text-sm mt-2",
+            !initialData.chapters.length && "text-slate-500 italic"
+          )}
+        >
+          {!initialData.chapters.length && "Pas de chapitres"}
           <ChaptersList
             onEdit={onEdit}
             onReorder={onReorder}
@@ -151,9 +147,9 @@ export const ChaptersForm = ({
       )}
       {!isCreating && (
         <p className="text-xs text-muted-foreground mt-4">
-          Drag and drop to reorder the chapters
+          Glissez-déposez pour réorganiser les chapitres
         </p>
       )}
     </div>
-  )
-}
+  );
+};

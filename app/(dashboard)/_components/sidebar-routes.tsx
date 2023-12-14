@@ -8,12 +8,12 @@ import { SidebarItem } from "./sidebar-item";
 const guestRoutes = [
   {
     icon: Layout,
-    label: "Dashboard",
+    label: "Tableau de bord",
     href: "/",
   },
   {
     icon: Compass,
-    label: "Browse",
+    label: "Parcourir",
     href: "/search",
   },
 ];
@@ -21,15 +21,15 @@ const guestRoutes = [
 const teacherRoutes = [
   {
     icon: List,
-    label: "Courses",
+    label: "Formations",
     href: "/teacher/courses",
   },
   {
     icon: BarChart,
-    label: "Analytics",
+    label: "Analytique",
     href: "/teacher/analytics",
   },
-]
+];
 
 export const SidebarRoutes = () => {
   const pathname = usePathname();
@@ -49,5 +49,5 @@ export const SidebarRoutes = () => {
         />
       ))}
     </div>
-  )
-}
+  );
+};

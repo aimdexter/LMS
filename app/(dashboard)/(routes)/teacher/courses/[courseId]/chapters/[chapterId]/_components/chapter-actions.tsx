@@ -14,13 +14,13 @@ interface ChapterActionsProps {
   courseId: string;
   chapterId: string;
   isPublished: boolean;
-};
+}
 
 export const ChapterActions = ({
   disabled,
   courseId,
   chapterId,
-  isPublished
+  isPublished,
 }: ChapterActionsProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,36 +30,40 @@ export const ChapterActions = ({
       setIsLoading(true);
 
       if (isPublished) {
-        await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/unpublish`);
-        toast.success("Chapter unpublished");
+        await axios.patch(
+          `/api/courses/${courseId}/chapters/${chapterId}/unpublish`
+        );
+        toast.success("Chapitre non publié");
       } else {
-        await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/publish`);
-        toast.success("Chapter published");
+        await axios.patch(
+          `/api/courses/${courseId}/chapters/${chapterId}/publish`
+        );
+        toast.success("Chapitre publié");
       }
 
       router.refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     } finally {
       setIsLoading(false);
     }
-  }
-  
+  };
+
   const onDelete = async () => {
     try {
       setIsLoading(true);
 
       await axios.delete(`/api/courses/${courseId}/chapters/${chapterId}`);
 
-      toast.success("Chapter deleted");
+      toast.success("Chapitre supprimé");
       router.refresh();
       router.push(`/teacher/courses/${courseId}`);
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center gap-x-2">
@@ -69,7 +73,7 @@ export const ChapterActions = ({
         variant="outline"
         size="sm"
       >
-        {isPublished ? "Unpublish" : "Publish"}
+        {isPublished ? "Annuler la publication" : "Publier"}
       </Button>
       <ConfirmModal onConfirm={onDelete}>
         <Button size="sm" disabled={isLoading}>
@@ -77,5 +81,5 @@ export const ChapterActions = ({
         </Button>
       </ConfirmModal>
     </div>
-  )
-}
+  );
+};

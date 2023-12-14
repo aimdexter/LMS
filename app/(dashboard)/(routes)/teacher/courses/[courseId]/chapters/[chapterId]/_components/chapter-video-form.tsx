@@ -17,7 +17,7 @@ interface ChapterVideoFormProps {
   initialData: Chapter & { muxData?: MuxData | null };
   courseId: string;
   chapterId: string;
-};
+}
 
 const formSchema = z.object({
   videoUrl: z.string().min(1),
@@ -36,50 +36,48 @@ export const ChapterVideoForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
-      toast.success("Chapter updated");
+      await axios.patch(
+        `/api/courses/${courseId}/chapters/${chapterId}`,
+        values
+      );
+      toast.success("Chapitre mis à jour");
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Quelque chose s'est mal passé");
     }
-  }
+  };
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Chapter video
+        Vidéo du chapitre
         <Button onClick={toggleEdit} variant="ghost">
-          {isEditing && (
-            <>Cancel</>
-          )}
+          {isEditing && <>Annuler</>}
           {!isEditing && !initialData.videoUrl && (
             <>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Add a video
+              Ajouter une vidéo
             </>
           )}
           {!isEditing && initialData.videoUrl && (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit video
+              Éditer vidéo
             </>
           )}
         </Button>
       </div>
-      {!isEditing && (
-        !initialData.videoUrl ? (
+      {!isEditing &&
+        (!initialData.videoUrl ? (
           <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
             <Video className="h-10 w-10 text-slate-500" />
           </div>
         ) : (
           <div className="relative aspect-video mt-2">
-            <MuxPlayer
-              playbackId={initialData?.muxData?.playbackId || ""}
-            />
+            <MuxPlayer playbackId={initialData?.muxData?.playbackId || ""} />
           </div>
-        )
-      )}
+        ))}
       {isEditing && (
         <div>
           <FileUpload
@@ -91,15 +89,16 @@ export const ChapterVideoForm = ({
             }}
           />
           <div className="text-xs text-muted-foreground mt-4">
-           Upload this chapter&apos;s video
+            Téléchargez la vidéo de ce chapitre
           </div>
         </div>
       )}
       {initialData.videoUrl && !isEditing && (
         <div className="text-xs text-muted-foreground mt-2">
-          Videos can take a few minutes to process. Refresh the page if video does not appear.
+          Le traitement des vidéos peut prendre quelques minutes. Actualisez la
+          page si la vidéo n`apparaît pas.
         </div>
       )}
     </div>
-  )
-}
+  );
+};

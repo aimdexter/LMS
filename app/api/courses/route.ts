@@ -15,7 +15,6 @@ export async function POST(req: Request) {
     }
 
     const embedding = await generateEmbedding(title);
-    console.log(embedding);
 
     const course = await db.course.create({
       data: {
@@ -36,8 +35,6 @@ export async function POST(req: Request) {
         WHERE id = ${existingCourse?.id}
     `;
 
-    console.log(newCourse);
-
     return NextResponse.json(course);
   } catch (error) {
     console.log("[COURSES]", error);
@@ -51,7 +48,6 @@ async function generateEmbedding(_input: string) {
     model: "text-embedding-ada-002",
     input,
   });
-  console.log(embeddingData);
   const [{ embedding }] = (embeddingData as any).data;
   return embedding;
 }

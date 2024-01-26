@@ -10,7 +10,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 
 export const SearchInput = () => {
   const [value, setValue] = useState("");
-  const debouncedValue = useDebounce(value);
+  // const debouncedValue = useDebounce(value);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -18,30 +18,39 @@ export const SearchInput = () => {
 
   const currentCategoryId = searchParams.get("categoryId");
 
-  useEffect(() => {
+  const executeSearch = () => {
     const url = qs.stringifyUrl(
       {
         url: pathname,
         query: {
           categoryId: currentCategoryId,
-          title: debouncedValue,
+          title: value,
         },
       },
       { skipEmptyString: true, skipNull: true }
     );
 
     router.push(url);
-  }, [debouncedValue, currentCategoryId, router, pathname]);
+  };
+
+  const handleKeyPress = (e: any) => {
+    if (e.key === "Enter") {
+      executeSearch();
+    }
+  };
 
   return (
     <div className="relative">
-      <Search className="h-4 w-4 absolute top-3 left-3 text-slate-600" />
       <Input
         onChange={(e) => setValue(e.target.value)}
+        onKeyPress={handleKeyPress}
         value={value}
-        className="w-full md:w-[300px] pl-9 rounded-full bg-slate-100 focus-visible:ring-slate-200"
+        className="w-full md:w-[300px] pr-9 rounded-full bg-slate-100 focus-visible:ring-slate-200"
         placeholder="Rechercher une formation"
       />
+      <button onClick={executeSearch} className="absolute right-3 top-3">
+        <Search className="h-5 w-5 text-slate-600" />
+      </button>
     </div>
   );
 };

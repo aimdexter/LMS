@@ -40,13 +40,13 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     const similarCourses = await db.$queryRaw`
       SELECT
         id,
-        1 - (vector <=> ${vectorQuery}::vector) as similarity
+        1 - (vector <-> ${vectorQuery}::vector) as similarity
       FROM "Course"
-      where 1 - (vector <=> ${vectorQuery}::vector) > .5
+      where 1 - (vector <-> ${vectorQuery}::vector) > .0001
       ORDER BY  similarity DESC;
     `;
 
-    console.log(similarCourses);
+    console.log(searchParams.title, similarCourses);
   }
 
   return (

@@ -3,10 +3,11 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { openai } from "@/lib/openai";
 
 const { Video } = new Mux(
   process.env.MUX_TOKEN_ID!,
-  process.env.MUX_TOKEN_SECRET!,
+  process.env.MUX_TOKEN_SECRET!
 );
 
 export async function DELETE(
@@ -29,9 +30,9 @@ export async function DELETE(
         chapters: {
           include: {
             muxData: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!course) {
@@ -73,16 +74,38 @@ export async function PATCH(
     const course = await db.course.update({
       where: {
         id: courseId,
-        userId
+        userId,
       },
       data: {
         ...values,
-      }
+      },
     });
+
+    const embedding = await generateEmbedding(
+      course.title + course.description
+    );
+
+    console.log(embedding);
+
+    const newCourse = await db.$executeRaw`
+            UPDATE "Course"
+            SET vector = ${embedding}::vector
+            WHERE id = ${courseId}
+        `;
 
     return NextResponse.json(course);
   } catch (error) {
     console.log("[COURSE_ID]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+}
+
+async function generateEmbedding(_input: string) {
+  const input = _input.replace(/\n/g, " ");
+  const embeddingData = await openai.embeddings.create({
+    model: "text-embedding-ada-002",
+    input,
+  });
+  const [{ embedding }] = (embeddingData as any).data;
+  return embedding;
 }

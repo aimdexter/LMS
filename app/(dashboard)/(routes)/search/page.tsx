@@ -18,6 +18,7 @@ interface SearchPageProps {
 
 const SearchPage = async ({ searchParams }: SearchPageProps) => {
   const { userId } = auth();
+  let courses;
 
   if (!userId) {
     return redirect("/");
@@ -29,24 +30,39 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     },
   });
 
-  const courses = await getCourses({
-    userId,
-    ...searchParams,
-  });
-
   if (searchParams.title) {
-    const embedding = await generateEmbedding(searchParams.title);
-    const vectorQuery = `[${embedding.join(",")}]`;
-    const similarCourses = await db.$queryRaw`
+    try {
+      const embedding = await generateEmbedding(searchParams.title);
+      const vectorQuery = `[${embedding.join(",")}]`;
+      const similarCourses = await db.$queryRaw`
       SELECT
         id,
         1 - (vector <-> ${vectorQuery}::vector) as similarity
       FROM "Course"
-      where 1 - (vector <-> ${vectorQuery}::vector) > .0001
+      where 1 - (vector <-> ${vectorQuery}::vector) > .5
       ORDER BY  similarity DESC;
     `;
+      console.log(searchParams.title, similarCourses);
 
-    console.log(searchParams.title, similarCourses);
+      const orderedIds = similarCourses.map((course) => course.id);
+
+      // Assuming getCourses accepts an object with a property that is an array of IDs
+      courses = await getCourses({
+        userId,
+        ids: orderedIds,
+      });
+    } catch (error) {
+      console.error("Error in fetching courses by title:", error);
+    }
+  } else {
+    try {
+      courses = await getCourses({
+        userId,
+        ...searchParams,
+      });
+    } catch (error) {
+      console.error("Error in fetching courses:", error);
+    }
   }
 
   return (

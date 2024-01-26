@@ -4,10 +4,18 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { SearchInput } from "@/components/search-input";
 import { getCourses } from "@/actions/get-courses";
-import { CoursesList } from "@/components/courses-list";
+import {
+  CourseWithProgressWithCategory,
+  CoursesList,
+} from "@/components/courses-list";
 
 import { Categories } from "./_components/categories";
 import { openai } from "@/lib/openai";
+
+type TSimilarCourses = {
+  id: string;
+  similarity: number;
+}[];
 
 interface SearchPageProps {
   searchParams: {
@@ -18,7 +26,7 @@ interface SearchPageProps {
 
 const SearchPage = async ({ searchParams }: SearchPageProps) => {
   const { userId } = auth();
-  let courses;
+  let courses: CourseWithProgressWithCategory[] = [];
 
   if (!userId) {
     return redirect("/");
@@ -34,7 +42,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     try {
       const embedding = await generateEmbedding(searchParams.title);
       const vectorQuery = `[${embedding.join(",")}]`;
-      const similarCourses = await db.$queryRaw`
+      const similarCourses: TSimilarCourses = await db.$queryRaw`
       SELECT
         id,
         1 - (vector <-> ${vectorQuery}::vector) as similarity

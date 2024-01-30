@@ -47,7 +47,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
         id,
         1 - (vector <-> ${vectorQuery}::vector) as similarity
       FROM "Course"
-      where 1 - (vector <-> ${vectorQuery}::vector) > .5
+      where 1 - (vector <-> ${vectorQuery}::vector) > .4
       ORDER BY  similarity DESC;
     `;
       console.log(searchParams.title, similarCourses);
@@ -59,6 +59,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
         userId,
         ids: orderedIds,
       });
+      console.log(courses);
     } catch (error) {
       console.error("Error in fetching courses by title:", error);
     }

@@ -81,8 +81,14 @@ export async function PATCH(
       },
     });
 
+    const category = await db.category.findFirst({
+      where: {
+        id: course.categoryId || "",
+      },
+    });
+
     const embedding = await generateEmbedding(
-      course.title + course.description
+      course.title + course.description + category?.name
     );
 
     console.log(embedding);

@@ -1,0 +1,121 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Course {
+  id String [pk]
+  userId String [not null]
+  title String [not null]
+  description String
+  imageUrl String
+  price Float
+  isPublished Boolean [not null, default: false]
+  categoryId String
+  category Category
+  chapters Chapter [not null]
+  attachments Attachment [not null]
+  purchases Purchase [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Category {
+  id String [pk]
+  name String [unique, not null]
+  courses Course [not null]
+  profils Profil [not null]
+}
+
+Table Profil {
+  id String [pk]
+  userId String [unique, not null]
+  nom String [not null]
+  prenom String [not null]
+  description String [not null]
+  studies String [not null]
+  categoryId String
+  category Category
+}
+
+Table Attachment {
+  id String [pk]
+  name String [not null]
+  url String [not null]
+  courseId String [not null]
+  course Course [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Chapter {
+  id String [pk]
+  title String [not null]
+  description String
+  videoUrl String
+  position Int [not null]
+  isPublished Boolean [not null, default: false]
+  isFree Boolean [not null, default: false]
+  muxData MuxData
+  courseId String [not null]
+  course Course [not null]
+  userProgress UserProgress [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table MuxData {
+  id String [pk]
+  assetId String [not null]
+  playbackId String
+  chapterId String [unique, not null]
+  chapter Chapter [not null]
+}
+
+Table UserProgress {
+  id String [pk]
+  userId String [not null]
+  chapterId String [not null]
+  chapter Chapter [not null]
+  isCompleted Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, chapterId) [unique]
+  }
+}
+
+Table Purchase {
+  id String [pk]
+  userId String [not null]
+  courseId String [not null]
+  course Course [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, courseId) [unique]
+  }
+}
+
+Table StripeCustomer {
+  id String [pk]
+  userId String [unique, not null]
+  stripeCustomerId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Ref: Course.categoryId > Category.id
+
+Ref: Profil.categoryId > Category.id
+
+Ref: Attachment.courseId > Course.id [delete: Cascade]
+
+Ref: Chapter.courseId > Course.id [delete: Cascade]
+
+Ref: MuxData.chapterId - Chapter.id [delete: Cascade]
+
+Ref: UserProgress.chapterId > Chapter.id [delete: Cascade]
+
+Ref: Purchase.courseId > Course.id [delete: Cascade]

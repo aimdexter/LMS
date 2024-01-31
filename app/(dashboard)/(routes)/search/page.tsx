@@ -11,10 +11,15 @@ import {
 
 import { Categories } from "./_components/categories";
 import { openai } from "@/lib/openai";
+import CreateProfilPage from "../profil/_components/create-profile-form";
+import { Banner } from "@/components/banner";
 
 type TSimilarCourses = {
   id: string;
   similarity: number;
+}[];
+type TProfileVector = {
+  vector: string;
 }[];
 
 interface SearchPageProps {
@@ -27,16 +32,51 @@ interface SearchPageProps {
 const SearchPage = async ({ searchParams }: SearchPageProps) => {
   const { userId } = auth();
   let courses: CourseWithProgressWithCategory[] = [];
+  let coursesProfile: CourseWithProgressWithCategory[] = [];
 
   if (!userId) {
     return redirect("/");
   }
+
+  const profil = await db.profil.findUnique({
+    where: {
+      userId,
+    },
+  });
 
   const categories = await db.category.findMany({
     orderBy: {
       name: "asc",
     },
   });
+
+  if (profil) {
+    try {
+      const profilVector: TProfileVector = await db.$queryRaw`
+      SELECT
+        vector::text
+      FROM "Profil"
+      where id = ${profil.id}
+    `;
+      const similarCourses: TSimilarCourses = await db.$queryRaw`
+      SELECT
+        id,
+        1 - (vector <-> ${profilVector[0].vector}::vector) as similarity
+      FROM "Course"
+      where 1 - (vector <-> ${profilVector[0].vector}::vector) > .3
+      ORDER BY  similarity DESC;
+    `;
+      const orderedIds = similarCourses.map((course) => course.id);
+
+      coursesProfile = await getCourses({
+        userId,
+        ids: orderedIds,
+      });
+      console.log(similarCourses);
+    } catch (error) {
+      console.error("Error in fetching courses by title:", error);
+    }
+  }
 
   if (searchParams.title) {
     try {
@@ -50,11 +90,9 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
       where 1 - (vector <-> ${vectorQuery}::vector) > .4
       ORDER BY  similarity DESC;
     `;
-      console.log(searchParams.title, similarCourses);
 
       const orderedIds = similarCourses.map((course) => course.id);
 
-      // Assuming getCourses accepts an object with a property that is an array of IDs
       courses = await getCourses({
         userId,
         ids: orderedIds,
@@ -74,17 +112,25 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     }
   }
 
-  return (
-    <>
-      <div className="px-6 pt-6 md:hidden md:mb-0 block">
-        <SearchInput />
-      </div>
-      <div className="p-6 space-y-4">
-        <Categories items={categories} />
-        <CoursesList items={courses} />
-      </div>
-    </>
-  );
+  if (profil == null) {
+    return <CreateProfilPage />;
+  } else {
+    return (
+      <>
+        <div className="px-6 pt-6 md:hidden md:mb-0 block">
+          <SearchInput />
+        </div>
+        <div className="p-6 space-y-4">
+          <Categories items={categories} />
+          <CoursesList items={courses} />
+        </div>
+        <div className="p-6 space-y-4">
+          <Banner label="Nous vous recommandant à base de votre profil les formations suivantes" />
+          <CoursesList items={coursesProfile} />
+        </div>
+      </>
+    );
+  }
 };
 
 export default SearchPage;

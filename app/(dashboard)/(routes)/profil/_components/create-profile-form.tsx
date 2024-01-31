@@ -61,6 +61,7 @@ const CreateProfilPage = ({ initData }: { initData: Profil }) => {
     try {
       const response = await axios.post("/api/profil", values);
       router.push(`/search`);
+      router.refresh();
       toast.success("Profil créé");
     } catch {
       toast.error("Quelque chose s'est mal passé");

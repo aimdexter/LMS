@@ -50,6 +50,8 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     },
   });
 
+  console.log(categories);
+
   if (profil) {
     try {
       const profilVector: TProfileVector = await db.$queryRaw`

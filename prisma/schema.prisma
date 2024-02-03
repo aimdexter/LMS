@@ -4,7 +4,8 @@ generator dbml {
 
 datasource db {
   provider     = "postgres"
-  url          = env("DATABASE_URL")
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
   relationMode = "prisma"
 }
 
